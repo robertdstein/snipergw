@@ -51,13 +51,13 @@ If you have not configured your winterapi user, you will be prompted for your wi
 Then, in order to trigger a ToO, you need to select a program (e.g 2020A000). You can set the program name as an environment variable:
 
 ```bash
-export WINTER_API_PROGRAM=2020A000
+export WINTER_PROGRAM_NAME=2020A000
 ```
 
 if you have not used the program before, you will also need to set the password:
 
 ```bash
-export WINTER_API_KEY=...
+export WINTER_PROGRAM_KEY=...
 ```
 After setting the password once, you will not need to repeat this step.
 
