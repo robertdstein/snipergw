@@ -35,7 +35,7 @@ dependencies = [
     "wget",
     "astropy",
     "numpy",
-    "gwemopt==0.2.2",
+    "gwemopt==0.3.4",
     "pandas",
     "pydantic>=2.2.0",
     "planobs",
