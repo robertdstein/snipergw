@@ -4,13 +4,32 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from planobs.api import APIError, Queue
+from planobs.api import APIError, Kowalski, Queue
 from planobs.models import TooTarget
 
 from snipergw.model import EventConfig, PlanConfig
 from snipergw.paths import base_output_dir
 
 ZTF_FILTER_MAP = {"g": 1, "r": 2, "i": 3}
+
+# The ztfpass server (which replaced the now-dead Kowalski ToO route) requires
+# the Authorization header to be "Bearer <token>", but planobs/penquins send
+# the bare token. Patch Kowalski to fix the header on every instance it
+# creates, since planobs.api.Queue.__init__ pings Kowalski immediately and
+# gives us no way to fix the header after the fact. Same fix as applied in
+# robertdstein/planobs@nutela for the nutela project.
+_original_kowalski_init = Kowalski.__init__
+
+
+def _patched_kowalski_init(self, *args, **kwargs):
+    _original_kowalski_init(self, *args, **kwargs)
+    for instance in self.instances.values():
+        token = instance.get("token")
+        if token:
+            instance["headers"]["Authorization"] = f"Bearer {token}"
+
+
+Kowalski.__init__ = _patched_kowalski_init
 
 
 def submit_too_ztf(
