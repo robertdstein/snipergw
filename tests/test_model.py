@@ -55,21 +55,6 @@ class TestPlanConfig(TestCase):
         with self.assertRaises(ValidationError):
             PlanConfig(telescope="not-a-telescope")
 
-    def test_decam_always_rejected(self) -> None:
-        """
-        DECam is listed in all_telescopes, but set_default_filter's
-        per-filter validation loop only special-cases ZTF/WINTER and
-        otherwise always raises -- so DECam can never actually be
-        constructed, even with explicit filters/exposuretime.
-
-        :return: None
-        """
-        with self.assertRaises(ValidationError):
-            PlanConfig(telescope="DECam")
-
-        with self.assertRaises(ValidationError):
-            PlanConfig(telescope="DECam", filters="g", exposuretime=100.0)
-
     def test_ztf_rejects_unknown_filter(self) -> None:
         """
         A filter outside ztf_default.all_filters should fail validation

@@ -133,15 +133,21 @@ class TestSubmitTooZtf(TestCase):
 
     def _patched_queue(self, mock_queue_cls: mock.MagicMock) -> mock.MagicMock:
         """
-        Configure the mocked Queue class with a single-entry .queue dict,
-        keyed the same way planobs.api.Queue keys it.
+        Configure the mocked Queue class with a two-entry .queue dict,
+        keyed the same way planobs.api.Queue keys it. Deliberately more
+        than one entry, so a test asserting on per-entry content (rather
+        than just "some file got written") would catch a regression like
+        every output file being written with entry 0's content.
 
         :param mock_queue_cls: Mock replacing planobs.api.Queue (the class,
             not an instance)
         :return: The mock instance mock_queue_cls() would return
         """
         mock_queue = mock_queue_cls.return_value
-        mock_queue.queue = {0: {"queue_name": self.expected_name}}
+        mock_queue.queue = {
+            0: {"queue_name": self.expected_name},
+            1: {"queue_name": f"{self.trigger_name}_1"},
+        }
         return mock_queue
 
     @mock.patch("snipergw.submit.ztf.time.sleep")
@@ -183,12 +189,15 @@ class TestSubmitTooZtf(TestCase):
         mock_queue.submit_queue.assert_called_once()
         mock_sleep.assert_called_once_with(5)
 
-        json_path = (
-            output_root / f"{self.event_name}/ZTF/json/{self.expected_name}.json"
-        )
-        self.assertTrue(json_path.exists())
-        with json_path.open() as f:
-            self.assertEqual(json.load(f), {"queue_name": self.expected_name})
+        # Each queue entry should get its own json file, with its own
+        # content -- not every file written with entry 0's content.
+        for entry in mock_queue.queue.values():
+            json_path = (
+                output_root / f"{self.event_name}/ZTF/json/{entry['queue_name']}.json"
+            )
+            self.assertTrue(json_path.exists())
+            with json_path.open() as f:
+                self.assertEqual(json.load(f), entry)
 
     @mock.patch("snipergw.submit.ztf.time.sleep")
     @mock.patch("snipergw.submit.ztf.base_output_dir")

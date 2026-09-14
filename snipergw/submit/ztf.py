@@ -99,10 +99,10 @@ def submit_too_ztf(
 
     output_dir = base_output_dir / f"{event_name}/ZTF/json/"
     output_dir.mkdir(parents=True, exist_ok=True)
-    for i, queue in q.queue.items():
+    for _, queue in q.queue.items():
         output_path = output_dir / f"{queue['queue_name']}.json"
         with output_path.open("w") as f:
-            json.dump(q.queue[0], f)
+            json.dump(queue, f)
 
     if submit:
         try:

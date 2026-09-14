@@ -145,9 +145,9 @@ class TestRunSnipergw(TestCase):
         :return: None
         """
         mock_run_gwemopt.return_value = self.schedule
-        # DECam can't be constructed via PlanConfig (see test_model.py), so
-        # use a stand-in with the attribute run_snipergw actually reads.
-        plan_config = SimpleNamespace(telescope="DECam")
+        # PlanConfig itself rejects any telescope outside all_telescopes,
+        # so use a stand-in with just the attribute run_snipergw reads.
+        plan_config = SimpleNamespace(telescope="not-a-real-telescope")
 
         with self.assertRaises(NotImplementedError):
             run_snipergw(event=self.event, plan_config=plan_config, submit=True)

@@ -74,8 +74,7 @@ def run_gwemopt(
     if "--powerlaw_cl" not in gwemopt_args:
         gwemopt_args += ["--powerlaw_cl", "0.9"]
 
-    if not plan_config.telescope == "DECam":
-        gwemopt_args += ["--doAlternatingFilters"]
+    gwemopt_args += ["--doAlternatingFilters"]
 
     if not plan_config.cache:
         logger.info(f"Running gwemopt with arguments: {gwemopt_args}")
