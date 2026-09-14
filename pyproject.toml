@@ -35,6 +35,7 @@ dependencies = [
     "wget",
     "astropy",
     "numpy",
+    "matplotlib<3.10",
     "gwemopt==0.2.2",
     "pandas",
     "pydantic>=2.2.0",
