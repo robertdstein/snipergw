@@ -29,7 +29,7 @@ class EventConfig(BaseModel):
 DEFAULT_TELESCOPE = "ZTF"
 DEFAULT_STARTTIME = Time.now() + 0.25 * u.hour
 
-all_telescopes = [DEFAULT_TELESCOPE, "WINTER", "DECam"]
+all_telescopes = [DEFAULT_TELESCOPE, "WINTER"]
 
 
 class TelescopeDefault(BaseModel):

@@ -41,8 +41,7 @@ dependencies = [
     "pydantic>=2.2.0",
     "planobs",
     "winterapi >= 1.4.0",
-    "numpy<2.0.0",
-    "matplotlib==3.7.1",
+    "wintertoo >= 1.4.0",
 ]
 [project.optional-dependencies]
 dev = [
