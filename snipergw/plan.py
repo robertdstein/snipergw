@@ -45,7 +45,8 @@ def run_gwemopt(
         "--telescopes",
         plan_config.telescope,
         "--doTiles",
-        "--doPlots",
+        "--plots",
+        "skymap,tiles,coverage,schedule,efficiency",
         "--doSchedule",
         "--timeallocationType",
         "powerlaw",
@@ -71,8 +72,8 @@ def run_gwemopt(
     if "--mindiff" not in gwemopt_args:
         gwemopt_args += ["--mindiff", "30"]
 
-    if "--powerlaw_cl" not in gwemopt_args:
-        gwemopt_args += ["--powerlaw_cl", "0.9"]
+    if "--confidence_level" not in gwemopt_args:
+        gwemopt_args += ["--confidence_level", "0.9"]
 
     gwemopt_args += ["--doAlternatingFilters"]
 
