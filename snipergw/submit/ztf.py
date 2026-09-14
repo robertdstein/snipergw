@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from pathlib import Path
@@ -7,6 +8,7 @@ from planobs.api import APIError, Queue
 from planobs.models import TooTarget
 
 from snipergw.model import EventConfig, PlanConfig
+from snipergw.paths import base_output_dir
 
 ZTF_FILTER_MAP = {"g": 1, "r": 2, "i": 3}
 
@@ -75,6 +77,13 @@ def submit_too_ztf(
         )
 
         return expected_name in kowalski_list
+
+    output_dir = base_output_dir / f"{event_name}/ZTF/json/"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for i, queue in q.queue.items():
+        output_path = output_dir / f"{queue['queue_name']}.json"
+        with output_path.open("w") as f:
+            json.dump(q.queue[0], f)
 
     if submit:
         try:
