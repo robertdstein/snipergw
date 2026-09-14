@@ -124,13 +124,22 @@ def run_gwemopt(
     schedule.to_csv(schedule_csv_path)
     logger.info(f"See schedule at {schedule_csv_path}")
 
-    tot_prob = 0.0
-
     all_fields = list(set(schedule["field"]))
 
-    for field in all_fields:
-        df = schedule[schedule["field"] == field]
-        tot_prob += df["prob"].iloc[0]
+    # Summing each field's own prob would double-count any sky area
+    # covered by more than one scheduled field -- e.g. ZTF's primary and
+    # secondary grids are offset specifically to overlap and cover each
+    # other's chip gaps. gwemopt's own cumulative coverage (the final row
+    # of tiles_coverage_int_<telescope>.txt) is computed from the union
+    # of all scheduled tiles' sky coverage, so it doesn't double-count
+    # that overlap; read it instead of re-deriving prob per field.
+    coverage_int_path = gwemopt_output_dir.joinpath(
+        f"tiles_coverage_int_{plan_config.telescope}.txt"
+    )
+    coverage_int = pd.read_csv(
+        coverage_int_path, sep=" ", names=["dt", "cum_prob", "cum_area"]
+    )
+    tot_prob = coverage_int["cum_prob"].iloc[-1]
 
     schedule_time = np.sum(schedule["texp"]) / 60.0 / 60.0
     logger.info(
