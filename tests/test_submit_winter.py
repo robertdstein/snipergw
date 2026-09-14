@@ -70,6 +70,7 @@ class TestSubmitTooWinter(TestCase):
                 self.assertEqual(too.field_id, row["field"])
                 self.assertEqual(too.filters, [row["filter"]])
                 self.assertEqual(too.n_dither, expected_n_dithers)
+                self.assertEqual(too.total_exposure_time, self.plan_config.exposuretime)
 
     @mock.patch.dict(
         "os.environ",
