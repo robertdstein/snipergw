@@ -13,21 +13,26 @@ class TestSubmitTooWinter(TestCase):
     mocked out so no real network/credential calls are made.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
+        """
+        :return: None
+        """
         now_mjd = Time.now().mjd
-        self.schedule = pd.DataFrame(
+        self.schedule: pd.DataFrame = pd.DataFrame(
             {
                 "field": [100, 200],
                 "filter": ["J", "J"],
                 "tobs": [now_mjd + 0.1, now_mjd + 0.3],
             }
         )
-        self.plan_config = mock.Mock(exposuretime=450.0)
+        self.plan_config: mock.Mock = mock.Mock(exposuretime=450.0)
 
-    def test_delete_not_implemented(self):
+    def test_delete_not_implemented(self) -> None:
         """
         delete=True should raise NotImplementedError before ever touching
         the module-level `winter` client
+
+        :return: None
         """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             with self.assertRaises(NotImplementedError):
@@ -43,11 +48,13 @@ class TestSubmitTooWinter(TestCase):
         "os.environ",
         {"WINTER_PROGRAM_NAME": "2020A000", "WINTER_PROGRAM_KEY": "secret"},
     )
-    def test_submit_builds_expected_too_list_and_submits(self):
+    def test_submit_builds_expected_too_list_and_submits(self) -> None:
         """
         submit_too_winter should build one WinterFieldToO per schedule
         row, with the expected target name, dithers, and exposure time,
         and pass them to winter.submit_too
+
+        :return: None
         """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             mock_winter.get_user.return_value = "test-user"
@@ -84,10 +91,12 @@ class TestSubmitTooWinter(TestCase):
         "os.environ",
         {"WINTER_PROGRAM_NAME": "2020A000", "WINTER_PROGRAM_KEY": "secret"},
     )
-    def test_submit_adds_program_when_missing(self):
+    def test_submit_adds_program_when_missing(self) -> None:
         """
         If WINTER_PROGRAM_NAME isn't already in winter.get_programs(), it
         should be registered via winter.add_program
+
+        :return: None
         """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             mock_winter.get_user.return_value = "test-user"
@@ -107,10 +116,12 @@ class TestSubmitTooWinter(TestCase):
         "os.environ",
         {"WINTER_PROGRAM_NAME": "2020A000", "WINTER_PROGRAM_KEY": "secret"},
     )
-    def test_submit_adds_user_details_when_missing(self):
+    def test_submit_adds_user_details_when_missing(self) -> None:
         """
         If winter.get_user() raises KeyError (no stored credentials),
         winter.add_user_details should be called to set them up
+
+        :return: None
         """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             mock_winter.get_user.side_effect = KeyError("no user")

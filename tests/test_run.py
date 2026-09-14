@@ -13,20 +13,35 @@ class TestRunSnipergw(TestCase):
     submission calls mocked out.
     """
 
-    def setUp(self):
-        self.event = EventConfig(event="S190425z", rev=2)
-        self.schedule = pd.DataFrame({"field": [1], "filter": ["g"], "tobs": [1.0]})
+    def setUp(self) -> None:
+        """
+        :return: None
+        """
+        self.event: EventConfig = EventConfig(event="S190425z", rev=2)
+        self.schedule: pd.DataFrame = pd.DataFrame(
+            {"field": [1], "filter": ["g"], "tobs": [1.0]}
+        )
 
     @mock.patch("snipergw.run.submit_too_winter")
     @mock.patch("snipergw.run.submit_too_ztf")
     @mock.patch("snipergw.run.run_gwemopt")
     @mock.patch("snipergw.run.Skymap")
     def test_no_submit_or_delete_does_not_call_submission(
-        self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
-    ):
+        self,
+        mock_skymap: mock.MagicMock,
+        mock_run_gwemopt: mock.MagicMock,
+        mock_submit_ztf: mock.MagicMock,
+        mock_submit_winter: mock.MagicMock,
+    ) -> None:
         """
         With submit=False and delete=False, neither submission function
         should be called
+
+        :param mock_skymap: Mock replacing snipergw.run.Skymap
+        :param mock_run_gwemopt: Mock replacing snipergw.run.run_gwemopt
+        :param mock_submit_ztf: Mock replacing snipergw.run.submit_too_ztf
+        :param mock_submit_winter: Mock replacing snipergw.run.submit_too_winter
+        :return: None
         """
         mock_run_gwemopt.return_value = self.schedule
         plan_config = PlanConfig(telescope="ZTF")
@@ -43,11 +58,21 @@ class TestRunSnipergw(TestCase):
     @mock.patch("snipergw.run.run_gwemopt")
     @mock.patch("snipergw.run.Skymap")
     def test_submit_ztf_dispatches_to_ztf(
-        self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
-    ):
+        self,
+        mock_skymap: mock.MagicMock,
+        mock_run_gwemopt: mock.MagicMock,
+        mock_submit_ztf: mock.MagicMock,
+        mock_submit_winter: mock.MagicMock,
+    ) -> None:
         """
         telescope=ZTF with submit=True should call submit_too_ztf, not
         submit_too_winter
+
+        :param mock_skymap: Mock replacing snipergw.run.Skymap
+        :param mock_run_gwemopt: Mock replacing snipergw.run.run_gwemopt
+        :param mock_submit_ztf: Mock replacing snipergw.run.submit_too_ztf
+        :param mock_submit_winter: Mock replacing snipergw.run.submit_too_winter
+        :return: None
         """
         mock_run_gwemopt.return_value = self.schedule
         plan_config = PlanConfig(telescope="ZTF")
@@ -68,11 +93,21 @@ class TestRunSnipergw(TestCase):
     @mock.patch("snipergw.run.run_gwemopt")
     @mock.patch("snipergw.run.Skymap")
     def test_delete_winter_dispatches_to_winter(
-        self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
-    ):
+        self,
+        mock_skymap: mock.MagicMock,
+        mock_run_gwemopt: mock.MagicMock,
+        mock_submit_ztf: mock.MagicMock,
+        mock_submit_winter: mock.MagicMock,
+    ) -> None:
         """
         telescope=WINTER with delete=True should call submit_too_winter,
         not submit_too_ztf
+
+        :param mock_skymap: Mock replacing snipergw.run.Skymap
+        :param mock_run_gwemopt: Mock replacing snipergw.run.run_gwemopt
+        :param mock_submit_ztf: Mock replacing snipergw.run.submit_too_ztf
+        :param mock_submit_winter: Mock replacing snipergw.run.submit_too_winter
+        :return: None
         """
         mock_run_gwemopt.return_value = self.schedule
         plan_config = PlanConfig(telescope="WINTER")
@@ -93,11 +128,21 @@ class TestRunSnipergw(TestCase):
     @mock.patch("snipergw.run.run_gwemopt")
     @mock.patch("snipergw.run.Skymap")
     def test_unsupported_telescope_raises(
-        self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
-    ):
+        self,
+        mock_skymap: mock.MagicMock,
+        mock_run_gwemopt: mock.MagicMock,
+        mock_submit_ztf: mock.MagicMock,
+        mock_submit_winter: mock.MagicMock,
+    ) -> None:
         """
         A telescope that's neither ZTF nor WINTER should raise
         NotImplementedError and call neither submission function
+
+        :param mock_skymap: Mock replacing snipergw.run.Skymap
+        :param mock_run_gwemopt: Mock replacing snipergw.run.run_gwemopt
+        :param mock_submit_ztf: Mock replacing snipergw.run.submit_too_ztf
+        :param mock_submit_winter: Mock replacing snipergw.run.submit_too_winter
+        :return: None
         """
         mock_run_gwemopt.return_value = self.schedule
         # DECam can't be constructed via PlanConfig (see test_model.py), so
