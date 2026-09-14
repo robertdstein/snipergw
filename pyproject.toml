@@ -34,7 +34,7 @@ dependencies = [
     "lxml",
     "wget",
     "astropy",
-    "numpy",
+    "numpy<2.4",
     "matplotlib<3.10",
     "gwemopt==0.2.2",
     "pandas",
