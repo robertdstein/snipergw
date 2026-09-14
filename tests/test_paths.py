@@ -17,6 +17,10 @@ class TestPaths(TestCase):
         importlib.reload(paths)
 
     def test_default_base_output_dir(self):
+        """
+        With SNIPERGW_DIR unset, base_output_dir should default to
+        ~/Data/snipergw/
+        """
         with mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop("SNIPERGW_DIR", None)
             importlib.reload(paths)
@@ -25,6 +29,10 @@ class TestPaths(TestCase):
         self.assertIsInstance(paths.base_output_dir, Path)
 
     def test_base_output_dir_from_env(self):
+        """
+        With SNIPERGW_DIR set, base_output_dir should be that path,
+        converted from a string to a Path
+        """
         with mock.patch.dict(os.environ, {"SNIPERGW_DIR": "/tmp/some/snipergw/dir"}):
             importlib.reload(paths)
 
@@ -32,4 +40,7 @@ class TestPaths(TestCase):
         self.assertIsInstance(paths.base_output_dir, Path)
 
     def test_gwemopt_dir(self):
+        """
+        gwemopt_dir should point at a "gwemopt" subdirectory
+        """
         self.assertEqual(paths.gwemopt_dir.name, "gwemopt")

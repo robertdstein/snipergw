@@ -17,6 +17,11 @@ class TestKowalskiBearerPatch(TestCase):
     """
 
     def test_bearer_prefix_added_to_every_instance(self):
+        """
+        A single Kowalski instance's Authorization header should be
+        rewritten from the bare token to "Bearer <token>"
+        """
+
         def fake_original_init(self, *_args, **kwargs):
             token = kwargs.get("token")
             self.instances = {
@@ -31,6 +36,11 @@ class TestKowalskiBearerPatch(TestCase):
         )
 
     def test_multiple_instances_all_patched(self):
+        """
+        Every instance in a multi-instance Kowalski client should get the
+        "Bearer " prefix, not just the first
+        """
+
         def fake_original_init(self, *_args, **_kwargs):
             self.instances = {
                 "one": {"token": "tok1", "headers": {"Authorization": "tok1"}},
@@ -48,6 +58,11 @@ class TestKowalskiBearerPatch(TestCase):
         )
 
     def test_missing_token_leaves_headers_untouched(self):
+        """
+        An instance with no token (e.g. username/password auth) shouldn't
+        get an Authorization header added
+        """
+
         def fake_original_init(self, *_args, **_kwargs):
             self.instances = {"default": {"token": None, "headers": {}}}
 
@@ -81,8 +96,11 @@ class TestSubmitTooZtf(TestCase):
         self.expected_name = f"{self.trigger_name}_0"
 
     def _patched_queue(self, mock_queue_cls):
+        """
+        Configure the mocked Queue class with a single-entry .queue dict,
+        keyed the same way planobs.api.Queue keys it.
+        """
         mock_queue = mock_queue_cls.return_value
-        # A single-entry queue, keyed the same way planobs.api.Queue keys it.
         mock_queue.queue = {0: {"queue_name": self.expected_name}}
         return mock_queue
 
@@ -92,6 +110,10 @@ class TestSubmitTooZtf(TestCase):
     def test_submit_writes_json_and_submits_queue(
         self, mock_queue_cls, mock_base_output_dir, mock_sleep
     ):
+        """
+        submit=True should add the trigger, submit the queue, write a json
+        file per queue entry, and confirm the trigger landed in the queue
+        """
         output_root = Path(self.tmp_dir.name)
         mock_base_output_dir.__truediv__ = lambda _self, other: output_root / other
 
@@ -125,6 +147,10 @@ class TestSubmitTooZtf(TestCase):
     def test_submit_deletes_preexisting_queue_of_same_name(
         self, mock_queue_cls, mock_base_output_dir, mock_sleep
     ):
+        """
+        submit=True should delete any pre-existing queue of the same name
+        (delete_queue succeeding, not raising APIError) before submitting
+        """
         output_root = Path(self.tmp_dir.name)
         mock_base_output_dir.__truediv__ = lambda _self, other: output_root / other
 
@@ -151,6 +177,10 @@ class TestSubmitTooZtf(TestCase):
     def test_submit_raises_if_trigger_missing_from_queue(
         self, mock_queue_cls, mock_base_output_dir, mock_sleep
     ):
+        """
+        If the expected trigger name never shows up in the queue after
+        submitting, submit_too_ztf should raise RuntimeError
+        """
         output_root = Path(self.tmp_dir.name)
         mock_base_output_dir.__truediv__ = lambda _self, other: output_root / other
 
@@ -171,6 +201,9 @@ class TestSubmitTooZtf(TestCase):
     def test_delete_removes_existing_trigger(
         self, mock_queue_cls, mock_base_output_dir
     ):
+        """
+        delete=True should delete the queue when the trigger is present
+        """
         output_root = Path(self.tmp_dir.name)
         mock_base_output_dir.__truediv__ = lambda _self, other: output_root / other
 
@@ -194,6 +227,10 @@ class TestSubmitTooZtf(TestCase):
     def test_delete_raises_if_trigger_not_in_queue(
         self, mock_queue_cls, mock_base_output_dir
     ):
+        """
+        delete=True should raise RuntimeError (and never call
+        delete_queue) if the trigger isn't in the queue
+        """
         output_root = Path(self.tmp_dir.name)
         mock_base_output_dir.__truediv__ = lambda _self, other: output_root / other
 

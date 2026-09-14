@@ -25,7 +25,10 @@ class TestSubmitTooWinter(TestCase):
         self.plan_config = mock.Mock(exposuretime=450.0)
 
     def test_delete_not_implemented(self):
-        # Must raise before ever touching the module-level `winter` client.
+        """
+        delete=True should raise NotImplementedError before ever touching
+        the module-level `winter` client
+        """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             with self.assertRaises(NotImplementedError):
                 submit_too_winter(
@@ -41,6 +44,11 @@ class TestSubmitTooWinter(TestCase):
         {"WINTER_PROGRAM_NAME": "2020A000", "WINTER_PROGRAM_KEY": "secret"},
     )
     def test_submit_builds_expected_too_list_and_submits(self):
+        """
+        submit_too_winter should build one WinterFieldToO per schedule
+        row, with the expected target name, dithers, and exposure time,
+        and pass them to winter.submit_too
+        """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             mock_winter.get_user.return_value = "test-user"
             mock_winter.get_programs.return_value = ["2020A000"]
@@ -77,6 +85,10 @@ class TestSubmitTooWinter(TestCase):
         {"WINTER_PROGRAM_NAME": "2020A000", "WINTER_PROGRAM_KEY": "secret"},
     )
     def test_submit_adds_program_when_missing(self):
+        """
+        If WINTER_PROGRAM_NAME isn't already in winter.get_programs(), it
+        should be registered via winter.add_program
+        """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             mock_winter.get_user.return_value = "test-user"
             mock_winter.get_programs.return_value = []
@@ -96,6 +108,10 @@ class TestSubmitTooWinter(TestCase):
         {"WINTER_PROGRAM_NAME": "2020A000", "WINTER_PROGRAM_KEY": "secret"},
     )
     def test_submit_adds_user_details_when_missing(self):
+        """
+        If winter.get_user() raises KeyError (no stored credentials),
+        winter.add_user_details should be called to set them up
+        """
         with mock.patch.object(winter_module, "winter") as mock_winter:
             mock_winter.get_user.side_effect = KeyError("no user")
             mock_winter.get_programs.return_value = ["2020A000"]

@@ -24,6 +24,10 @@ class TestRunSnipergw(TestCase):
     def test_no_submit_or_delete_does_not_call_submission(
         self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
     ):
+        """
+        With submit=False and delete=False, neither submission function
+        should be called
+        """
         mock_run_gwemopt.return_value = self.schedule
         plan_config = PlanConfig(telescope="ZTF")
 
@@ -41,6 +45,10 @@ class TestRunSnipergw(TestCase):
     def test_submit_ztf_dispatches_to_ztf(
         self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
     ):
+        """
+        telescope=ZTF with submit=True should call submit_too_ztf, not
+        submit_too_winter
+        """
         mock_run_gwemopt.return_value = self.schedule
         plan_config = PlanConfig(telescope="ZTF")
 
@@ -62,6 +70,10 @@ class TestRunSnipergw(TestCase):
     def test_delete_winter_dispatches_to_winter(
         self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
     ):
+        """
+        telescope=WINTER with delete=True should call submit_too_winter,
+        not submit_too_ztf
+        """
         mock_run_gwemopt.return_value = self.schedule
         plan_config = PlanConfig(telescope="WINTER")
 
@@ -83,6 +95,10 @@ class TestRunSnipergw(TestCase):
     def test_unsupported_telescope_raises(
         self, mock_skymap, mock_run_gwemopt, mock_submit_ztf, mock_submit_winter
     ):
+        """
+        A telescope that's neither ZTF nor WINTER should raise
+        NotImplementedError and call neither submission function
+        """
         mock_run_gwemopt.return_value = self.schedule
         # DECam can't be constructed via PlanConfig (see test_model.py), so
         # use a stand-in with the attribute run_snipergw actually reads.

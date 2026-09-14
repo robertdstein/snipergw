@@ -28,6 +28,10 @@ class TestParseFitsFile(TestCase):
         self.skymap = _bare_skymap(self.base_skymap_dir)
 
     def test_existing_local_file_is_reused(self):
+        """
+        A file already present in base_skymap_dir should be reused as-is,
+        without attempting a download
+        """
         existing = self.base_skymap_dir.joinpath("event.fits")
         existing.touch()
 
@@ -39,6 +43,9 @@ class TestParseFitsFile(TestCase):
         self.assertEqual(event_name, "event.fits")
 
     def test_https_url_is_downloaded(self):
+        """
+        An https:// event should be downloaded into base_skymap_dir
+        """
         url = "https://example.com/dir/remote_event.fits"
 
         with mock.patch("snipergw.skymap.wget.download") as mock_download:
@@ -49,6 +56,10 @@ class TestParseFitsFile(TestCase):
         self.assertEqual(event_name, "remote_event.fits")
 
     def test_unrecognised_path_raises(self):
+        """
+        A path that's neither an existing local file nor an https:// URL
+        should raise FileNotFoundError
+        """
         with self.assertRaises(FileNotFoundError):
             self.skymap.parse_fits_file("not_a_real_local_or_remote_file.fits")
 
@@ -70,6 +81,10 @@ class TestSkymapInit(TestCase):
         self.addCleanup(self.read_map_patch.stop)
 
     def test_unrecognised_event_raises(self):
+        """
+        An event string matching none of the fits/GW/GRB patterns should
+        raise
+        """
         event_config = EventConfig(
             event="not-a-known-format", output_dir=self.output_dir
         )
@@ -79,6 +94,9 @@ class TestSkymapInit(TestCase):
         self.assertIn("not recognised", str(ctx.exception))
 
     def test_fits_event_dispatches_to_parse_fits_file(self):
+        """
+        An event name containing ".fit" should dispatch to parse_fits_file
+        """
         event_config = EventConfig(event="local.fits", output_dir=self.output_dir)
         with mock.patch.object(
             Skymap, "parse_fits_file", return_value=("path", "local.fits")
@@ -90,6 +108,9 @@ class TestSkymapInit(TestCase):
         self.assertFalse(skymap.is_3d)
 
     def test_none_event_dispatches_to_gw_skymap(self):
+        """
+        event=None should dispatch to get_gw_skymap and set is_3d=True
+        """
         event_config = EventConfig(event=None, rev=3, output_dir=self.output_dir)
         with mock.patch.object(
             Skymap, "get_gw_skymap", return_value=("path", "S000000a")
@@ -101,6 +122,10 @@ class TestSkymapInit(TestCase):
         self.assertTrue(skymap.is_3d)
 
     def test_gw_like_event_dispatches_to_gw_skymap(self):
+        """
+        An event name containing "S"/"gw"/"GW" should dispatch to
+        get_gw_skymap and set is_3d=True
+        """
         event_config = EventConfig(event="S190425z", rev=2, output_dir=self.output_dir)
         with mock.patch.object(
             Skymap, "get_gw_skymap", return_value=("path", "S190425z")
@@ -112,6 +137,10 @@ class TestSkymapInit(TestCase):
         self.assertTrue(skymap.is_3d)
 
     def test_grb_event_dispatches_to_grb_skymap(self):
+        """
+        An event name containing "GRB" should dispatch to get_grb_skymap
+        and leave is_3d=False
+        """
         event_config = EventConfig(event="GRB210729A", output_dir=self.output_dir)
         with mock.patch.object(
             Skymap, "get_grb_skymap", return_value=("path", "GRB210729A")
@@ -158,6 +187,10 @@ class TestGetGrbSkymap(TestCase):
         return [overview_response, event_response]
 
     def test_downloads_when_not_already_saved(self):
+        """
+        When the matched healpix file isn't already saved locally, it
+        should be downloaded from the resolved final_link
+        """
         with (
             mock.patch(
                 "snipergw.skymap.requests.get", side_effect=self._mock_responses()
@@ -171,6 +204,10 @@ class TestGetGrbSkymap(TestCase):
         self.assertEqual(skymap_path.name, "glg_healpix_all_bn210729000_v00.fit")
 
     def test_reuses_existing_local_file(self):
+        """
+        When the matched healpix file already exists locally, it should
+        be reused without downloading
+        """
         existing = Path(self.tmp_dir.name).joinpath(
             "glg_healpix_all_bn210729000_v00.fit"
         )
@@ -188,5 +225,8 @@ class TestGetGrbSkymap(TestCase):
         self.assertEqual(skymap_path, existing)
 
     def test_missing_event_name_raises(self):
+        """
+        get_grb_skymap requires an event name and should reject None
+        """
         with self.assertRaises(ValueError):
             self.skymap.get_grb_skymap(None)
