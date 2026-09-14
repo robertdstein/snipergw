@@ -6,8 +6,6 @@ from winterapi.messenger import WinterFieldToO
 
 from snipergw.model import PlanConfig
 
-winter = WinterAPI()
-
 MAX_EXPOSURE_TIME = 30
 MIN_DITHER = 5
 
@@ -31,6 +29,8 @@ def submit_too_winter(
 
     if delete:
         raise NotImplementedError("Delete not implemented for Winter")
+
+    winter = WinterAPI()
 
     try:
         print(f"User is {winter.get_user()}")

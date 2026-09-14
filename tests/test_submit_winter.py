@@ -9,8 +9,8 @@ from snipergw.submit.winter import MAX_EXPOSURE_TIME, MIN_DITHER, submit_too_win
 
 class TestSubmitTooWinter(TestCase):
     """
-    Test submit_too_winter, with the module-level `winter` WinterAPI client
-    mocked out so no real network/credential calls are made.
+    Test submit_too_winter, with WinterAPI mocked out so no real
+    network/credential calls are made.
     """
 
     def setUp(self) -> None:
@@ -29,12 +29,12 @@ class TestSubmitTooWinter(TestCase):
 
     def test_delete_not_implemented(self) -> None:
         """
-        delete=True should raise NotImplementedError before ever touching
-        the module-level `winter` client
+        delete=True should raise NotImplementedError before ever
+        constructing a WinterAPI client
 
         :return: None
         """
-        with mock.patch.object(winter_module, "winter") as mock_winter:
+        with mock.patch.object(winter_module, "WinterAPI") as mock_winter_cls:
             with self.assertRaises(NotImplementedError):
                 submit_too_winter(
                     self.schedule,
@@ -42,7 +42,7 @@ class TestSubmitTooWinter(TestCase):
                     plan_config=self.plan_config,
                     delete=True,
                 )
-            mock_winter.get_user.assert_not_called()
+            mock_winter_cls.assert_not_called()
 
     @mock.patch.dict(
         "os.environ",
@@ -56,7 +56,8 @@ class TestSubmitTooWinter(TestCase):
 
         :return: None
         """
-        with mock.patch.object(winter_module, "winter") as mock_winter:
+        with mock.patch.object(winter_module, "WinterAPI") as mock_winter_cls:
+            mock_winter = mock_winter_cls.return_value
             mock_winter.get_user.return_value = "test-user"
             mock_winter.get_programs.return_value = ["2020A000"]
             mock_winter.submit_too.return_value = ("ok", "schedule")
@@ -98,7 +99,8 @@ class TestSubmitTooWinter(TestCase):
 
         :return: None
         """
-        with mock.patch.object(winter_module, "winter") as mock_winter:
+        with mock.patch.object(winter_module, "WinterAPI") as mock_winter_cls:
+            mock_winter = mock_winter_cls.return_value
             mock_winter.get_user.return_value = "test-user"
             mock_winter.get_programs.return_value = []
             mock_winter.submit_too.return_value = ("ok", "schedule")
@@ -123,7 +125,8 @@ class TestSubmitTooWinter(TestCase):
 
         :return: None
         """
-        with mock.patch.object(winter_module, "winter") as mock_winter:
+        with mock.patch.object(winter_module, "WinterAPI") as mock_winter_cls:
+            mock_winter = mock_winter_cls.return_value
             mock_winter.get_user.side_effect = KeyError("no user")
             mock_winter.get_programs.return_value = ["2020A000"]
             mock_winter.submit_too.return_value = ("ok", "schedule")
